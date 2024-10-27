@@ -11,10 +11,11 @@ const props = defineProps({
     restaurant: Object,
     categories: Array,
     type: String,
+    settings: Array,
 });
 
-const center = usePage().props.settings.location
-    ? JSON.parse(usePage().props.settings.location)
+const center = props.settings.location
+    ? JSON.parse(props.settings.location)
     : { lat: 40.689247, lng: -74.044502 };
 
 const markerOptions = ref({
@@ -207,16 +208,46 @@ const addOrderVariation = (variation) => {
                 <!-- <img src="/assets/images/logo.png" class="w-20" alt="" /> -->
                 <img
                     class="w-20 h-12 object-contain"
-                    :src="$page.props.settings.logo"
+                    :src="settings.logo"
                     alt=""
                 />
             </Link>
             <!-- End Logo container-->
 
-            <ul class="navigation-menu nav-light justify-end">
-                <li>
-                    <a href="reservation.html" class="sub-menu-item">Login</a>
-                </li>
+            <ul class="navigation-menu flex gap-x-6 nav-light justify-end">
+                <template v-if="!$page.props.auth.user">
+                    <li>
+                        <Link
+                            class="sub-menu-item"
+                            :href="route('customer.login', restaurant.code)"
+                            >{{ t("Login") }}</Link
+                        >
+                    </li>
+                    <li>
+                        <Link
+                            class="sub-menu-item"
+                            :href="route('customer.register', restaurant.code)"
+                            >{{ t("Register") }}</Link
+                        >
+                    </li>
+                </template>
+                <template v-else>
+                    <li>
+                        <Link
+                            class="sub-menu-item"
+                            :href="route('customer.index', restaurant.code)"
+                            >{{ t("My Account") }}</Link
+                        >
+                    </li>
+                    <li>
+                        <Link
+                            class="sub-menu-item"
+                            :href="route('customer.logout', restaurant.code)"
+                            method="post"
+                            >{{ t("Logout") }}</Link
+                        >
+                    </li>
+                </template>
             </ul>
         </div>
         <!--end container-->
@@ -237,7 +268,7 @@ const addOrderVariation = (variation) => {
                     <h5
                         class="md:text-4xl text-3xl md:leading-normal leading-normal font-medium text-white mb-0"
                     >
-                        {{ $page.props.settings.name }}
+                        {{ settings.name }}
                     </h5>
                 </div>
             </div>
@@ -276,8 +307,8 @@ const addOrderVariation = (variation) => {
                 ></path>
             </svg>
             <a
-                v-if="$page.props.settings.whatsapp"
-                :href="`https://wa.me/${$page.props.settings.whatsapp}`"
+                v-if="settings.whatsapp"
+                :href="`https://wa.me/${settings.whatsapp}`"
                 target="_blank"
             >
                 <svg
@@ -294,8 +325,8 @@ const addOrderVariation = (variation) => {
         </div>
         <div class="w-2/4 flex gap-2 justify-center">
             <a
-                v-if="$page.props.settings.facebook"
-                :href="$page.props.settings.facebook"
+                v-if="settings.facebook"
+                :href="settings.facebook"
                 target="_blank"
             >
                 <svg
@@ -309,11 +340,7 @@ const addOrderVariation = (variation) => {
                     ></path>
                 </svg>
             </a>
-            <a
-                v-if="$page.props.settings.x"
-                :href="$page.props.settings.x"
-                target="_blank"
-            >
+            <a v-if="settings.x" :href="settings.x" target="_blank">
                 <svg
                     class="w-6 h-6"
                     xmlns="http://www.w3.org/2000/svg"
@@ -326,8 +353,8 @@ const addOrderVariation = (variation) => {
                 </svg>
             </a>
             <a
-                v-if="$page.props.settings.instagram"
-                :href="$page.props.settings.instagram"
+                v-if="settings.instagram"
+                :href="settings.instagram"
                 target="_blank"
             >
                 <svg
@@ -341,11 +368,7 @@ const addOrderVariation = (variation) => {
                     ></path>
                 </svg>
             </a>
-            <a
-                v-if="$page.props.settings.tiktok"
-                :href="$page.props.settings.tiktok"
-                target="_blank"
-            >
+            <a v-if="settings.tiktok" :href="settings.tiktok" target="_blank">
                 <svg
                     class="w-6 h-6 text-[#ee1d52]"
                     xmlns="http://www.w3.org/2000/svg"
@@ -358,8 +381,8 @@ const addOrderVariation = (variation) => {
                 </svg>
             </a>
             <a
-                v-if="$page.props.settings.snapchat"
-                :href="$page.props.settings.snapchat"
+                v-if="settings.snapchat"
+                :href="settings.snapchat"
                 target="_blank"
             >
                 <svg
@@ -373,11 +396,7 @@ const addOrderVariation = (variation) => {
                     ></path>
                 </svg>
             </a>
-            <a
-                v-if="$page.props.settings.youtube"
-                :href="$page.props.settings.youtube"
-                target="_blank"
-            >
+            <a v-if="settings.youtube" :href="settings.youtube" target="_blank">
                 <svg
                     class="w-6 h-6 text-[#ff0000]"
                     xmlns="http://www.w3.org/2000/svg"
@@ -685,7 +704,7 @@ const addOrderVariation = (variation) => {
                     <li class="py-1.5 flex items-center gap-x-2 px-4">
                         <Link
                             class="bg-red-500 hover:bg-red-600 duration-300 text-white px-2 py-1 rounded m-1 text-center w-full"
-                            :href="route('checkout')"
+                            :href="route('checkout', restaurant.code)"
                             >{{ t("Checkout") }}</Link
                         >
                     </li>
@@ -729,7 +748,7 @@ const addOrderVariation = (variation) => {
             </button>
             <h2 class="font-bold mb-4 text-center">{{ t("Working Time") }}</h2>
             <div
-                v-for="time in JSON.parse($page.props.settings.working_time)"
+                v-for="time in JSON.parse(settings.working_time)"
                 class="flex items-center justify-between mb-2"
             >
                 <template
@@ -845,7 +864,7 @@ const addOrderVariation = (variation) => {
                                     />
                                     <label
                                         :for="`option-${option.id}`"
-                                        class="inline-flex items-center justify-between w-full py-1 px-3 text-gray-500 border border-gray-200 rounded-lg cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 dark:peer-checked:text-amber-500 peer-checked:border-amber-600 peer-checked:text-amber-600 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700 text-sm md:text-base"
+                                        class="inline-flex items-center justify-center w-full py-1 px-3 text-gray-500 border border-gray-200 rounded-lg cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 dark:peer-checked:text-amber-500 peer-checked:border-amber-600 peer-checked:text-amber-600 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700 text-sm md:text-base min-w-32"
                                         :class="{
                                             'pointer-events-none bg-gray-100':
                                                 option.price == 0,
@@ -878,7 +897,7 @@ const addOrderVariation = (variation) => {
                             <tbody>
                                 <tr>
                                     <td
-                                        class="border border-slate-300 dark:border-slate-700 p-4 text-slate-500 dark:text-slate-400 w-1/2"
+                                        class="border border-slate-300 dark:border-slate-700 p-4 text-slate-500 dark:text-slate-400 w-1/2 align-top"
                                     >
                                         <template
                                             v-for="(
@@ -910,7 +929,7 @@ const addOrderVariation = (variation) => {
                                         </template>
                                     </td>
                                     <td
-                                        class="border border-slate-300 dark:border-slate-700 p-4 text-slate-500 dark:text-slate-400"
+                                        class="border border-slate-300 dark:border-slate-700 p-4 text-slate-500 dark:text-slate-400 align-top"
                                     >
                                         <template
                                             v-for="(
@@ -928,7 +947,7 @@ const addOrderVariation = (variation) => {
                                                         )
                                                     "
                                                     type="radio"
-                                                    :name="`paid-${variation.variation_id}`"
+                                                    :name="`free-${variation.variation_id}`"
                                                     :value="variation.id"
                                                 />
                                                 {{

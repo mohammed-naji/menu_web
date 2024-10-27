@@ -4,6 +4,7 @@ use App\Http\Controllers\AdvertisementController;
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MainController;
 use App\Http\Controllers\MenuItemController;
@@ -59,9 +60,21 @@ Route::get('/change-language/{lang?}', function (Request $request, $lang = 'en')
 require __DIR__ . '/auth.php';
 
 
-Route::get('checkout', [CheckoutController::class, 'checkout'])->name('checkout');
-Route::post('checkout', [CheckoutController::class, 'make_order'])->name('make_order');
-Route::get('/checkout/success', [CheckoutController::class, 'success'])->name('checkout.success');
-Route::get('/checkout/cancel', [CheckoutController::class, 'cancel'])->name('checkout.cancel');
+Route::get('{code}/checkout', [CheckoutController::class, 'checkout'])->name('checkout');
+Route::post('{code}/checkout', [CheckoutController::class, 'make_order'])->name('make_order');
+Route::get('{code}/checkout/success', [CheckoutController::class, 'success'])->name('checkout.success');
+Route::get('{code}/checkout/cancel', [CheckoutController::class, 'cancel'])->name('checkout.cancel');
+
+Route::prefix('{code}/customer')->name('customer.')->group(function () {
+    Route::get('/', [CustomerController::class, 'index'])->name('index');
+
+    Route::get('login', [CustomerController::class, 'login'])->name('login');
+    Route::post('login', [CustomerController::class, 'store']);
+
+    Route::get('register', [CustomerController::class, 'register'])->name('register');
+    Route::post('register', [CustomerController::class, 'register_store']);
+
+    Route::post('logout', [CustomerController::class, 'logout'])->name('logout');
+});
 
 Route::get('/{code}/{type?}', [MainController::class, 'menu'])->name('menu');

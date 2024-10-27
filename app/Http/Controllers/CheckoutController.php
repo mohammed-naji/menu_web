@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\Restaurant;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,9 +14,15 @@ use Stripe\StripeClient;
 
 class CheckoutController extends Controller
 {
-    function checkout(Request $request)
+    function checkout(Request $request, $code)
     {
-        return Inertia::render('Checkout');
+        $restaurant = Restaurant::where('code', $code)->first();
+        $settings = [];
+        foreach ($restaurant->settings as $setting) {
+            $settings[$setting->key] = $setting->value;
+        }
+
+        return Inertia::render('Checkout', compact('restaurant', 'settings'));
     }
 
     function make_order(Request $request)

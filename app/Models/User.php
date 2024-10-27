@@ -24,6 +24,7 @@ class User extends Authenticatable
         'image',
         'location',
         'password',
+        'restaurant_id'
     ];
 
     /**
@@ -52,5 +53,10 @@ class User extends Authenticatable
     function restaurant()
     {
         return $this->hasOne(Restaurant::class, 'owner_id');
+    }
+
+    function orders()
+    {
+        return $this->hasMany(Order::class);
     }
 }

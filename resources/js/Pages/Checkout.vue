@@ -1,22 +1,34 @@
 <script setup>
 import { t } from "@/Composables/trans";
-import { Head, router, useForm, usePage } from "@inertiajs/vue3";
+import { Head, Link, router, useForm, usePage } from "@inertiajs/vue3";
 import { onMounted, ref } from "vue";
 import { computed } from "vue";
 import { loadStripe } from "@stripe/stripe-js";
 import axios from "axios";
 import InputError from "@/Components/InputError.vue";
 import Swal from "sweetalert2";
+import LangSwitcher from "@/Components/LangSwitcher.vue";
 
-const total_price = computed(() => {
-    let total = 0;
-    cart.value.forEach((item) => {
-        total += Number(item.price);
-    });
-    return total;
+defineProps({
+    restaurant: Object,
+    settings: Object,
 });
 
 const cart = ref([]);
+
+const total_price = computed(() => {
+    return cart.value
+        .reduce((acc, item) => acc + Number(item.price), 0)
+        .toFixed(2);
+});
+
+const discount_price = computed(() => {
+    let value = 0;
+    if (usePage().props.auth.user) {
+        value = total_price.value * 0.07;
+    }
+    return value.toFixed(2);
+});
 
 const processing = ref(false);
 
@@ -45,6 +57,7 @@ const sendWhatsappOrder = () => {};
 
 const getCart = () => {
     cart.value = JSON.parse(localStorage.getItem("cart")) || [];
+    console.log(cart.value);
 };
 </script>
 
@@ -52,17 +65,52 @@ const getCart = () => {
     <Head :title="t('Checkout')" />
     <!-- Start Navbar -->
     <nav id="topnav" class="defaultscroll is-sticky">
-        <div class="flex items-center justify-between py-1 px-10">
+        <div class="flex items-center justify-between py-2 px-10">
             <!-- Logo container-->
-            <a class="logo" href="index.html">
-                <img src="/assets/images/logo.png" class="w-20" alt="" />
-            </a>
+            <Link class="logo" :href="route('menu', [restaurant.code, type])">
+                <!-- <img src="/assets/images/logo.png" class="w-20" alt="" /> -->
+                <img
+                    class="w-20 h-12 object-contain"
+                    :src="settings.logo"
+                    alt=""
+                />
+            </Link>
             <!-- End Logo container-->
 
-            <ul class="navigation-menu nav-light justify-end">
-                <li>
-                    <a href="reservation.html" class="sub-menu-item">Login</a>
-                </li>
+            <ul class="navigation-menu flex gap-x-6 nav-light justify-end">
+                <template v-if="!$page.props.auth.user">
+                    <li>
+                        <Link
+                            class="sub-menu-item"
+                            :href="route('customer.login', restaurant.code)"
+                            >{{ t("Login") }}</Link
+                        >
+                    </li>
+                    <li>
+                        <Link
+                            class="sub-menu-item"
+                            :href="route('customer.register', restaurant.code)"
+                            >{{ t("Register") }}</Link
+                        >
+                    </li>
+                </template>
+                <template v-else>
+                    <li>
+                        <Link
+                            class="sub-menu-item"
+                            :href="route('customer.index', restaurant.code)"
+                            >{{ t("My Account") }}</Link
+                        >
+                    </li>
+                    <li>
+                        <Link
+                            class="sub-menu-item"
+                            :href="route('customer.logout', restaurant.code)"
+                            method="post"
+                            >{{ t("Logout") }}</Link
+                        >
+                    </li>
+                </template>
             </ul>
         </div>
         <!--end container-->
@@ -73,6 +121,7 @@ const getCart = () => {
     <section
         class="relative md:py-28 py-20 bg-[url('../../assets/images/bg/pages.jpg')] bg-no-repeat bg-bottom bg-cover"
     >
+        <LangSwitcher />
         <div
             class="absolute inset-0 bg-gradient-to-t from-slate-900 to-slate-900/70"
         ></div>
@@ -108,7 +157,7 @@ const getCart = () => {
     </div>
     <!-- End Hero -->
     <div
-        class="font-sans max-w-6xl max-lg:max-w-2xl mx-auto bg-white dark:bg-slate-600 p-10 md:p-20"
+        class="max-w-6xl max-lg:max-w-2xl mx-auto bg-white dark:bg-slate-600 p-10 md:p-20"
     >
         <div class="grid lg:grid-cols-2 gap-12">
             <div>
@@ -127,7 +176,7 @@ const getCart = () => {
                                 class="w-24 h-24 shrink-0 bg-white p-2 rounded-md"
                             >
                                 <img
-                                    :src="item.image"
+                                    :src="item.menu_item.image"
                                     class="w-full h-full object-contain"
                                 />
                             </div>
@@ -136,23 +185,27 @@ const getCart = () => {
                                 <h3
                                     class="text-base font-semibold text-gray-800 dark:text-white"
                                 >
-                                    {{ item.name[$page.props.locale] }}
+                                    {{
+                                        item.menu_item.name[$page.props.locale]
+                                    }}
                                 </h3>
                                 <h5
                                     class="text-gray-800 dark:text-white font-bold cursor-pointer mt-0.5"
                                 >
                                     ${{ item.price }}
                                 </h5>
-                                <!-- <p
-                                    class="font-medium text-sm leading-7 text-black dark:text-white pr-4 mr-4"
+                                <p
+                                    class="text-sm leading-7 text-black dark:text-white pr-4 mr-4"
                                     v-for="variation in item.variations"
                                 >
-                                    {{ variation.variation.trans_name }}:
+                                    {{ variation.name[$page.props.locale] }}:
+                                    {{ variation.price }}$
+                                    <!-- {{ variation.variation.name }}:
                                     <span
                                         class="text-gray-500 dark:text-gray-400"
-                                        >{{ variation.trans_value }}</span
-                                    >
-                                </p> -->
+                                        >{{ variation }}</span
+                                    > -->
+                                </p>
                                 <div class="flex gap-4 mt-4">
                                     <div>
                                         <button
@@ -260,7 +313,7 @@ const getCart = () => {
                     <li class="flex justify-between flex-wrap gap-4 text-sm">
                         {{ t("Membership Discount") }}
                         ({{ 7 }}%)
-                        <span class="font-bold">$8</span>
+                        <span class="font-bold">${{ discount_price }}</span>
                     </li>
                     <!-- <li class="flex flex-wrap gap-4 text-sm">
                             Tax <span class="ml-auto font-bold">{{ $page.props.settings.currency_symbol }}4.00</span>
@@ -271,7 +324,9 @@ const getCart = () => {
                     >
                         {{ t("Total") }}
                         <span class="font-bold"
-                            >${{ Number(total_price).toFixed(2) }}</span
+                            >${{
+                                Number(total_price - discount_price).toFixed(2)
+                            }}</span
                         >
                     </li>
                 </ul>

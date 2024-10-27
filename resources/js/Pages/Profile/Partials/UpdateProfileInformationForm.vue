@@ -98,7 +98,7 @@ const handleClick = (event) => {
         </header>
 
         <form @submit.prevent="form.post(route('profile.update'))" class="mt-6">
-            <div class="flex w-full gap-x-6">
+            <div class="flex w-full gap-x-10">
                 <div class="w-[36rem] space-y-6">
                     <div>
                         <InputLabel for="name" :value="t('Name')" />

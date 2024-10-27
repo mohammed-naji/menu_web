@@ -178,7 +178,7 @@ const tabs = ref([t("General Settings"), t("Social Media"), t("Working Time")]);
                                     {{ tab }}
                                 </button>
 
-                                <div class="py-8">
+                                <div class="pt-8">
                                     <div v-if="activeTab == 0">
                                         <div
                                             class="flex items-center flex-col md:flex-row mb-6"
@@ -325,28 +325,28 @@ const tabs = ref([t("General Settings"), t("Social Media"), t("Working Time")]);
                                                 </option>
                                             </select>
                                         </div>
-                                        <div>
-                                            <div>
-                                                <label
-                                                    for="currency"
-                                                    class="block text-sm font-medium text-gray-700 w-44"
-                                                    >{{ t("Location") }}</label
-                                                >
-                                                <GoogleMap
-                                                    api-key="AIzaSyBIuHQWvrEHg_WXDFR3xYs--TwlqAel8Ds"
-                                                    style="
-                                                        width: 100%;
-                                                        height: 300px;
-                                                    "
-                                                    :center="center"
-                                                    :zoom="12"
-                                                    @click="handleClick"
-                                                >
-                                                    <Marker
-                                                        :options="markerOptions"
-                                                    />
-                                                </GoogleMap>
-                                            </div>
+                                        <div
+                                            class="flex items-center flex-col md:flex-row mb-6"
+                                        >
+                                            <label
+                                                for="currency"
+                                                class="block text-sm font-medium text-gray-700 w-44"
+                                                >{{ t("Location") }}</label
+                                            >
+                                            <GoogleMap
+                                                api-key="AIzaSyBIuHQWvrEHg_WXDFR3xYs--TwlqAel8Ds"
+                                                style="
+                                                    width: 100%;
+                                                    height: 300px;
+                                                "
+                                                :center="center"
+                                                :zoom="12"
+                                                @click="handleClick"
+                                            >
+                                                <Marker
+                                                    :options="markerOptions"
+                                                />
+                                            </GoogleMap>
                                         </div>
                                     </div>
                                     <div v-if="activeTab == 1">

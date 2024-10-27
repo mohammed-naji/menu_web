@@ -34,7 +34,7 @@ class HandleInertiaRequests extends Middleware
     {
         $file = lang_path(App::currentLocale() . ".json");
         $settings = [];
-        if ($request->user()) {
+        if ($request->user() && $request->user()->restaurant) {
             foreach ($request->user()->restaurant->settings as $setting) {
                 $settings[$setting->key] = $setting->value;
             }
