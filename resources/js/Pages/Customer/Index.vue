@@ -6,6 +6,8 @@ import { ref } from "vue";
 import UpdatePasswordForm from "../Profile/Partials/UpdatePasswordForm.vue";
 import LangSwitcher from "@/Components/LangSwitcher.vue";
 import moment from "moment";
+import Navbar from "@/Components/Navbar.vue";
+import Hero from "@/Components/Hero.vue";
 
 defineProps({
     restaurant: Object,
@@ -29,98 +31,8 @@ const tabs = ref([
 <template>
     <Head :title="t('Menu')" />
     <!-- Start Navbar -->
-    <nav id="topnav" class="defaultscroll is-sticky">
-        <div class="flex items-center justify-between py-2 px-10">
-            <!-- Logo container-->
-            <Link class="logo" :href="route('menu', [restaurant.code, type])">
-                <!-- <img src="/assets/images/logo.png" class="w-20" alt="" /> -->
-                <img
-                    class="w-20 h-12 object-contain"
-                    :src="settings.logo"
-                    alt=""
-                />
-            </Link>
-            <!-- End Logo container-->
-
-            <ul class="navigation-menu flex gap-x-6 nav-light justify-end">
-                <template v-if="!$page.props.auth.user">
-                    <li>
-                        <Link
-                            class="sub-menu-item"
-                            :href="route('customer.login', restaurant.code)"
-                            >{{ t("Login") }}</Link
-                        >
-                    </li>
-                    <li>
-                        <Link
-                            class="sub-menu-item"
-                            :href="route('customer.register', restaurant.code)"
-                            >{{ t("Register") }}</Link
-                        >
-                    </li>
-                </template>
-                <template v-else>
-                    <li>
-                        <Link
-                            class="sub-menu-item"
-                            :href="route('customer.index', restaurant.code)"
-                            >{{ t("My Account") }}</Link
-                        >
-                    </li>
-                    <li>
-                        <Link
-                            class="sub-menu-item"
-                            :href="route('customer.logout', restaurant.code)"
-                            method="post"
-                            >{{ t("Logout") }}</Link
-                        >
-                    </li>
-                </template>
-            </ul>
-        </div>
-        <!--end container-->
-    </nav>
-    <!--end header-->
-    <!-- End Navbar -->
-    <!-- Start Hero -->
-    <section
-        class="relative md:py-28 py-20 bg-[url('../../assets/images/bg/pages.jpg')] bg-no-repeat bg-bottom bg-cover"
-    >
-        <LangSwitcher />
-        <div
-            class="absolute inset-0 bg-gradient-to-t from-slate-900 to-slate-900/70"
-        ></div>
-        <div class="container relative">
-            <div class="grid grid-cols-1 text-center mt-6">
-                <div>
-                    <h5
-                        class="md:text-4xl text-3xl md:leading-normal leading-normal font-medium text-white mb-0"
-                    >
-                        {{ t("My Account") }}
-                    </h5>
-                </div>
-            </div>
-        </div>
-    </section>
-    <!--end section-->
-    <div class="relative">
-        <div
-            class="shape absolute sm:-bottom-px -bottom-[2px] start-0 end-0 overflow-hidden z-1 text-white dark:text-slate-900"
-        >
-            <svg
-                class="w-full h-auto scale-[2.0] origin-top"
-                viewBox="0 0 2880 48"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-            >
-                <path
-                    d="M0 48H1437.5H2880V0H2160C1442.5 52 720 0 720 0H0V48Z"
-                    fill="currentColor"
-                ></path>
-            </svg>
-        </div>
-    </div>
-    <!-- End Hero -->
+    <Navbar :restaurant="restaurant" :type="type" :settings="settings" />
+    <Hero :title="t('My Account')" />
 
     <!-- Start -->
     <section class="relative md:py-14 py-10">

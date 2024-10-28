@@ -60,12 +60,12 @@ Route::get('/change-language/{lang?}', function (Request $request, $lang = 'en')
 require __DIR__ . '/auth.php';
 
 
-Route::get('{code}/checkout', [CheckoutController::class, 'checkout'])->name('checkout');
-Route::post('{code}/checkout', [CheckoutController::class, 'make_order'])->name('make_order');
-Route::get('{code}/checkout/success', [CheckoutController::class, 'success'])->name('checkout.success');
-Route::get('{code}/checkout/cancel', [CheckoutController::class, 'cancel'])->name('checkout.cancel');
+Route::get('{code}/{type}/checkout', [CheckoutController::class, 'checkout'])->name('checkout');
+Route::post('{code}/{type}/checkout', [CheckoutController::class, 'make_order'])->name('make_order');
+Route::get('{code}/{type}/checkout/success', [CheckoutController::class, 'success'])->name('checkout.success');
+Route::get('{code}/{type}/checkout/cancel', [CheckoutController::class, 'cancel'])->name('checkout.cancel');
 
-Route::prefix('{code}/customer')->name('customer.')->group(function () {
+Route::prefix('{code}/{type}/customer')->name('customer.')->group(function () {
     Route::get('/', [CustomerController::class, 'index'])->name('index');
 
     Route::get('login', [CustomerController::class, 'login'])->name('login');
@@ -77,4 +77,4 @@ Route::prefix('{code}/customer')->name('customer.')->group(function () {
     Route::post('logout', [CustomerController::class, 'logout'])->name('logout');
 });
 
-Route::get('/{code}/{type?}', [MainController::class, 'menu'])->name('menu');
+Route::get('/{code}/{type}', [MainController::class, 'menu'])->name('menu');

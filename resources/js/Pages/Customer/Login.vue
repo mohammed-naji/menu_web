@@ -7,6 +7,8 @@ import TextInput from "@/Components/TextInput.vue";
 import { Head, Link, useForm } from "@inertiajs/vue3";
 import LangSwitcher from "@/Components/LangSwitcher.vue";
 import { t } from "@/Composables/trans";
+import Navbar from "@/Components/Navbar.vue";
+import Hero from "@/Components/Hero.vue";
 
 const props = defineProps({
     restaurant: {
@@ -14,6 +16,9 @@ const props = defineProps({
     },
     settings: {
         type: Array,
+    },
+    type: {
+        type: String,
     },
     canResetPassword: {
         type: Boolean,
@@ -31,7 +36,7 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.post(route("customer.login", props.restaurant.code), {
+    form.post(route("customer.login", [props.restaurant.code, props.type]), {
         onFinish: () => form.reset("password"),
     });
 };
@@ -39,77 +44,8 @@ const submit = () => {
 
 <template>
     <Head :title="t('Login')" />
-    <nav id="topnav" class="defaultscroll is-sticky">
-        <div class="flex items-center justify-between py-2 px-10">
-            <!-- Logo container-->
-            <Link class="logo" :href="route('menu', [restaurant.code, type])">
-                <img
-                    class="w-20 h-12 object-contain"
-                    :src="settings.logo"
-                    alt=""
-                />
-            </Link>
-            <!-- End Logo container-->
-
-            <ul class="navigation-menu flex gap-x-6 nav-light justify-end">
-                <li>
-                    <Link
-                        class="sub-menu-item"
-                        :href="route('customer.login', restaurant.code)"
-                        >{{ t("Login") }}</Link
-                    >
-                </li>
-                <li>
-                    <Link
-                        class="sub-menu-item"
-                        :href="route('customer.register', restaurant.code)"
-                        >{{ t("Register") }}</Link
-                    >
-                </li>
-            </ul>
-        </div>
-        <!--end container-->
-    </nav>
-    <!--end header-->
-    <!-- End Navbar -->
-    <!-- Start Hero -->
-    <section
-        class="relative md:py-16 py-14 bg-[url('../../assets/images/bg/pages.jpg')] bg-no-repeat bg-bottom bg-cover"
-    >
-        <LangSwitcher />
-        <div
-            class="absolute inset-0 bg-gradient-to-t from-slate-900 to-slate-900/70"
-        ></div>
-        <div class="container relative">
-            <div class="grid grid-cols-1 text-center mt-6">
-                <div>
-                    <h5
-                        class="md:text-4xl text-3xl md:leading-normal leading-normal font-medium text-white mb-0"
-                    >
-                        {{ t("Login") }}
-                    </h5>
-                </div>
-            </div>
-        </div>
-    </section>
-    <!--end section-->
-    <div class="relative">
-        <div
-            class="shape absolute sm:-bottom-px -bottom-[2px] start-0 end-0 overflow-hidden z-1 text-white dark:text-slate-900"
-        >
-            <svg
-                class="w-full h-auto scale-[2.0] origin-top"
-                viewBox="0 0 2880 48"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-            >
-                <path
-                    d="M0 48H1437.5H2880V0H2160C1442.5 52 720 0 720 0H0V48Z"
-                    fill="currentColor"
-                ></path>
-            </svg>
-        </div>
-    </div>
+    <Navbar :restaurant="restaurant" :type="type" :settings="settings" />
+    <Hero :title="t('Login')" />
     <div
         class="mt-14 w-full overflow-hidden bg-white px-6 py-4 shadow-md sm:max-w-md mx-auto sm:rounded-lg"
     >

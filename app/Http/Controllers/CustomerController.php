@@ -23,12 +23,14 @@ class CustomerController extends Controller
             $settings[$setting->key] = $setting->value;
         }
 
-        $orders = Auth::user()->orders()->latest()->paginate(10);
+        /** @var \App\Models\User */
+        $user = Auth::user();
+        $orders = $user->orders()->latest()->paginate(10);
 
         return Inertia::render('Customer/Index', compact('restaurant', 'settings', 'orders'));
     }
 
-    function login($code)
+    function login($code, $type)
     {
         if (Auth::check()) return redirect()->back();
 
@@ -38,10 +40,10 @@ class CustomerController extends Controller
             $settings[$setting->key] = $setting->value;
         }
 
-        return Inertia::render('Customer/Login', compact('restaurant', 'settings'));
+        return Inertia::render('Customer/Login', compact('restaurant', 'settings', 'type'));
     }
 
-    function store(Request $request, $code)
+    function store(Request $request, $code, $type)
     {
         $request->validate([
             'email' => 'required|exists:users,email',
@@ -54,7 +56,7 @@ class CustomerController extends Controller
             if (Hash::check($request->password, $user->password)) {
                 Auth::login($user);
                 $request->session()->regenerateToken();
-                return redirect()->intended(route('menu', $code));
+                return redirect()->intended(route('menu', [$code, $type]));
             } else {
                 return redirect()
                     ->back()
@@ -69,7 +71,7 @@ class CustomerController extends Controller
         }
     }
 
-    function register($code)
+    function register($code, $type)
     {
         if (Auth::check()) return redirect()->back();
 
@@ -79,10 +81,10 @@ class CustomerController extends Controller
             $settings[$setting->key] = $setting->value;
         }
 
-        return Inertia::render('Customer/Register', compact('restaurant', 'settings'));
+        return Inertia::render('Customer/Register', compact('restaurant', 'settings', 'type'));
     }
 
-    function register_store(Request $request, $code)
+    function register_store(Request $request, $code, $type)
     {
         $request->validate([
             'name' => 'required|string|max:255',
@@ -101,10 +103,10 @@ class CustomerController extends Controller
 
         Auth::login($auth);
 
-        return redirect()->route('menu', $code);
+        return redirect()->route('menu', [$code, $type]);
     }
 
-    function logout(Request $request, $code)
+    function logout(Request $request, $code, $type)
     {
         Auth::guard('web')->logout();
 
@@ -112,6 +114,6 @@ class CustomerController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect()->route('menu', $code);
+        return redirect()->route('menu', [$code, $type]);
     }
 }

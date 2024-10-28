@@ -14,7 +14,7 @@ use Stripe\StripeClient;
 
 class CheckoutController extends Controller
 {
-    function checkout(Request $request, $code)
+    function checkout($code, $type)
     {
         $restaurant = Restaurant::where('code', $code)->first();
         $settings = [];
@@ -22,7 +22,12 @@ class CheckoutController extends Controller
             $settings[$setting->key] = $setting->value;
         }
 
-        return Inertia::render('Checkout', compact('restaurant', 'settings'));
+        $branches = [];
+        if ($type == 'delivery') {
+            $branches = $restaurant->branches;
+        }
+
+        return Inertia::render('Checkout', compact('restaurant', 'settings', 'type', 'branches'));
     }
 
     function make_order(Request $request)

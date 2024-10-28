@@ -240,5 +240,7 @@
     "Credit Card": "بطاقة ائتمانية",
     "Processing": "جاري المعالجة",
     "Make Payment": "ادفع الان",
-    "Send Order to Whatsapp": "ارسل الطلب عبر الواتساب"
+    "Send Order to Whatsapp": "ارسل الطلب عبر الواتساب",
+    "Delivery Method": "طريقة الاستلام",
+    "From Branch": "من الفرع"
 }

@@ -5,7 +5,8 @@ import { t } from "@/Composables/trans";
 import { Head, Link, router, usePage } from "@inertiajs/vue3";
 import Swal from "sweetalert2";
 import { GoogleMap, Marker } from "vue3-google-map";
-import LangSwitcher from "@/Components/LangSwitcher.vue";
+import Navbar from "@/Components/Navbar.vue";
+import Hero from "@/Components/Hero.vue";
 
 const props = defineProps({
     restaurant: Object,
@@ -201,98 +202,10 @@ const addOrderVariation = (variation) => {
 <template>
     <Head :title="t('Menu')" />
     <!-- Start Navbar -->
-    <nav id="topnav" class="defaultscroll is-sticky">
-        <div class="flex items-center justify-between py-2 px-10">
-            <!-- Logo container-->
-            <Link class="logo" :href="route('menu', [restaurant.code, type])">
-                <!-- <img src="/assets/images/logo.png" class="w-20" alt="" /> -->
-                <img
-                    class="w-20 h-12 object-contain"
-                    :src="settings.logo"
-                    alt=""
-                />
-            </Link>
-            <!-- End Logo container-->
-
-            <ul class="navigation-menu flex gap-x-6 nav-light justify-end">
-                <template v-if="!$page.props.auth.user">
-                    <li>
-                        <Link
-                            class="sub-menu-item"
-                            :href="route('customer.login', restaurant.code)"
-                            >{{ t("Login") }}</Link
-                        >
-                    </li>
-                    <li>
-                        <Link
-                            class="sub-menu-item"
-                            :href="route('customer.register', restaurant.code)"
-                            >{{ t("Register") }}</Link
-                        >
-                    </li>
-                </template>
-                <template v-else>
-                    <li>
-                        <Link
-                            class="sub-menu-item"
-                            :href="route('customer.index', restaurant.code)"
-                            >{{ t("My Account") }}</Link
-                        >
-                    </li>
-                    <li>
-                        <Link
-                            class="sub-menu-item"
-                            :href="route('customer.logout', restaurant.code)"
-                            method="post"
-                            >{{ t("Logout") }}</Link
-                        >
-                    </li>
-                </template>
-            </ul>
-        </div>
-        <!--end container-->
-    </nav>
+    <Navbar :restaurant="restaurant" :type="type" :settings="settings" />
     <!--end header-->
     <!-- End Navbar -->
-    <!-- Start Hero -->
-    <section
-        class="relative md:py-28 py-20 bg-[url('../../assets/images/bg/pages.jpg')] bg-no-repeat bg-bottom bg-cover"
-    >
-        <LangSwitcher />
-        <div
-            class="absolute inset-0 bg-gradient-to-t from-slate-900 to-slate-900/70"
-        ></div>
-        <div class="container relative">
-            <div class="grid grid-cols-1 text-center mt-6">
-                <div>
-                    <h5
-                        class="md:text-4xl text-3xl md:leading-normal leading-normal font-medium text-white mb-0"
-                    >
-                        {{ settings.name }}
-                    </h5>
-                </div>
-            </div>
-        </div>
-    </section>
-    <!--end section-->
-    <div class="relative">
-        <div
-            class="shape absolute sm:-bottom-px -bottom-[2px] start-0 end-0 overflow-hidden z-1 text-white dark:text-slate-900"
-        >
-            <svg
-                class="w-full h-auto scale-[2.0] origin-top"
-                viewBox="0 0 2880 48"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-            >
-                <path
-                    d="M0 48H1437.5H2880V0H2160C1442.5 52 720 0 720 0H0V48Z"
-                    fill="currentColor"
-                ></path>
-            </svg>
-        </div>
-    </div>
-    <!-- End Hero -->
+    <Hero :title="settings.name" />
     <div class="flex mt-10 md:px-28 px-3">
         <div class="w-1/4 flex gap-2">
             <svg
@@ -509,7 +422,7 @@ const addOrderVariation = (variation) => {
                         }}</span>
 
                         <h5
-                            class="text-white px-2 font-medium flex justify-center items-center gap-2 absolute left-0 bg-red-500 top-0"
+                            class="text-white px-2 text-sm font-medium flex justify-center items-center gap-2 absolute left-0 bg-amber-500 top-0"
                         >
                             <span
                                 >${{
@@ -623,7 +536,7 @@ const addOrderVariation = (variation) => {
         </button>
         <!-- Dropdown menu -->
         <div
-            class="dropdown-menu absolute left-[1/3] bottom-full m-0 mt-4 z-10 w-4/5 sm:w-2/3 rounded-md bg-white dark:bg-slate-900 shadow dark:shadow-gray-800"
+            class="dropdown-menu absolute left-[1/3] bottom-full m-0 mt-4 z-10 w-4/5 sm:w-2/3 rounded-md bg-gray-100 dark:bg-slate-900 shadow dark:shadow-gray-800"
             onclick="event.stopPropagation();"
             v-if="showCart"
         >
@@ -671,7 +584,7 @@ const addOrderVariation = (variation) => {
                             <div
                                 class="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white"
                             >
-                                {{ item.price }}
+                                {{ Number(item.price).toFixed(2) }}
                             </div>
                         </div>
                         <svg
@@ -704,7 +617,7 @@ const addOrderVariation = (variation) => {
                     <li class="py-1.5 flex items-center gap-x-2 px-4">
                         <Link
                             class="bg-red-500 hover:bg-red-600 duration-300 text-white px-2 py-1 rounded m-1 text-center w-full"
-                            :href="route('checkout', restaurant.code)"
+                            :href="route('checkout', [restaurant.code, type])"
                             >{{ t("Checkout") }}</Link
                         >
                     </li>
