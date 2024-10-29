@@ -24,6 +24,21 @@ const form = useForm({
     email: user.email,
     phone: user.phone,
     location: user.location,
+    addresses: user.addresses.map((el) => {
+        return {
+            id: el.id,
+            name_en: el.name.en,
+            name_ar: el.name.ar,
+            location: el.location,
+            default: el.default,
+            center: JSON.parse(el.location),
+            markerOptions: {
+                position: JSON.parse(el.location),
+                label: "A",
+                title: "Location",
+            },
+        };
+    }),
     image: "",
     _method: "patch",
 });
@@ -61,23 +76,59 @@ watch(
     }
 );
 
-const handleClick = (event) => {
+const handleClick = (address = null, event) => {
     const lat = event.latLng.lat();
     const lng = event.latLng.lng();
 
-    form.location = JSON.stringify({
-        lat,
-        lng,
-    });
-
-    markerOptions.value = {
-        position: {
+    if (address) {
+        address.location = JSON.stringify({
             lat,
             lng,
+        });
+
+        address.markerOptions = {
+            position: {
+                lat,
+                lng,
+            },
+            label: "A",
+            title: "Location",
+        };
+    } else {
+        form.location = JSON.stringify({
+            lat,
+            lng,
+        });
+        markerOptions.value = {
+            position: {
+                lat,
+                lng,
+            },
+            label: "A",
+            title: "Location",
+        };
+    }
+};
+
+const addAddress = () => {
+    form.addresses.push({
+        id: null,
+        name_en: "",
+        name_ar: "",
+        location: "",
+        default: 0,
+        center: { lat: 40.689247, lng: -74.044502 },
+        markerOptions: {
+            position: { lat: 40.689247, lng: -74.044502 },
+            label: "A",
+            title: "Location",
         },
-        label: "A",
-        title: "Location",
-    };
+    });
+};
+
+const changeDefault = (index) => {
+    form.addresses.forEach((el) => (el.default = 0));
+    form.addresses[index].default = 1;
 };
 </script>
 
@@ -186,12 +237,86 @@ const handleClick = (event) => {
                             api-key="AIzaSyBIuHQWvrEHg_WXDFR3xYs--TwlqAel8Ds"
                             style="width: 100%; height: 300px"
                             :center="center"
-                            :zoom="12"
-                            @click="handleClick"
+                            :zoom="15"
+                            @click="handleClick(null, $event)"
                         >
                             <Marker :options="markerOptions" />
                         </GoogleMap>
                     </div>
+                    <div
+                        v-for="(address, index) in form.addresses"
+                        :key="index"
+                    >
+                        <InputLabel for="location" :value="t('Address')" />
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
+                            <div class="col-span-2">
+                                <div class="flex justify-between">
+                                    <label>
+                                        <input
+                                            type="radio"
+                                            name="default-address"
+                                            value="1"
+                                            v-model="address.default"
+                                            @click="changeDefault(index)"
+                                        />
+                                        {{ t("Default Address") }}
+                                    </label>
+                                    <Link
+                                        v-if="address.id"
+                                        class="text-red-500"
+                                        :href="
+                                            route('remove_address', address.id)
+                                        "
+                                        method="post"
+                                        >{{ t("Delete Address") }}</Link
+                                    >
+                                </div>
+                            </div>
+                            <div>
+                                <InputLabel
+                                    for="name"
+                                    :value="t('English Address')"
+                                />
+
+                                <TextInput
+                                    id="phone"
+                                    type="text"
+                                    class="mt-1 block w-full"
+                                    v-model="address.name_en"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <InputLabel
+                                    for="name"
+                                    :value="t('Arabic Address')"
+                                />
+
+                                <TextInput
+                                    id="phone"
+                                    type="text"
+                                    class="mt-1 block w-full"
+                                    v-model="address.name_ar"
+                                    required
+                                />
+                            </div>
+                        </div>
+                        <GoogleMap
+                            api-key="AIzaSyBIuHQWvrEHg_WXDFR3xYs--TwlqAel8Ds"
+                            style="width: 100%; height: 300px"
+                            :center="address.center"
+                            :zoom="15"
+                            @click="handleClick(address, $event)"
+                        >
+                            <Marker :options="address.markerOptions" />
+                        </GoogleMap>
+                    </div>
+
+                    <span
+                        @click="addAddress"
+                        class="underline hover:text-blue-400 text-blue-500 block cursor-pointer"
+                        >+ {{ t("Add another address") }}</span
+                    >
 
                     <div class="flex items-center gap-4">
                         <PrimaryButton :disabled="form.processing">{{

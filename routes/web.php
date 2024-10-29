@@ -77,4 +77,6 @@ Route::prefix('{code}/{type}/customer')->name('customer.')->group(function () {
     Route::post('logout', [CustomerController::class, 'logout'])->name('logout');
 });
 
+Route::post('remove_address/{id}', [CustomerController::class, 'remove_address'])->name('remove_address');
+
 Route::get('/{code}/{type}', [MainController::class, 'menu'])->name('menu');

@@ -12,6 +12,7 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
+    protected $with = ['orders', 'addresses'];
     /**
      * The attributes that are mass assignable.
      *
@@ -58,5 +59,10 @@ class User extends Authenticatable
     function orders()
     {
         return $this->hasMany(Order::class);
+    }
+
+    function addresses()
+    {
+        return $this->hasMany(Address::class);
     }
 }

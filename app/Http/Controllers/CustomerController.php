@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Address;
 use App\Models\Restaurant;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -115,5 +116,11 @@ class CustomerController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('menu', [$code, $type]);
+    }
+
+    function remove_address($id)
+    {
+        Address::destroy($id);
+        return back();
     }
 }

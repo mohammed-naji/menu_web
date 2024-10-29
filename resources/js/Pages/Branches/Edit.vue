@@ -117,7 +117,7 @@ const handleClick = (event) => {
                                         api-key="AIzaSyBIuHQWvrEHg_WXDFR3xYs--TwlqAel8Ds"
                                         style="width: 100%; height: 300px"
                                         :center="center"
-                                        :zoom="12"
+                                        :zoom="15"
                                         @click="handleClick"
                                     >
                                         <Marker :options="markerOptions" />

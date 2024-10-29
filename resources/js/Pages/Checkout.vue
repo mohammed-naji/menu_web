@@ -44,6 +44,7 @@ const form = useForm({
     address: "",
     table_number: "",
     delivery_method: "from branch",
+    delivery_location: 0,
     payment_method: "cash",
 });
 
@@ -265,11 +266,23 @@ const handleClick = (event) => {
                                     }}{{ Number(item.price).toFixed(2) }}
                                 </h5>
                                 <p
+                                    v-if="item.size_variation_id"
+                                    class="text-xs leading-7 text-black dark:text-white px-4"
+                                >
+                                    {{ t("Size") }}:
+                                    {{
+                                        item.menu_item.size_variations.find(
+                                            (el) =>
+                                                el.id == item.size_variation_id
+                                        ).name[$page.props.locale]
+                                    }}
+                                </p>
+                                <p
                                     class="text-xs leading-7 text-black dark:text-white px-4"
                                     v-for="variation in item.variations"
                                 >
                                     {{ variation.name[$page.props.locale] }}:
-                                    {{ variation.price }}$
+                                    {{ variation.price }}{{ currency_symbol }}
                                 </p>
                                 <div class="flex gap-4 mt-4">
                                     <div>
@@ -367,12 +380,16 @@ const handleClick = (event) => {
                 <ul class="text-gray-800 dark:text-white mt-8 space-y-4">
                     <li class="flex justify-between flex-wrap gap-4 text-sm">
                         {{ t("Subtotal") }}
-                        <span class="font-bold">${{ total_price }}</span>
+                        <span class="font-bold"
+                            >{{ currency_symbol }}{{ total_price }}</span
+                        >
                     </li>
                     <li class="flex justify-between flex-wrap gap-4 text-sm">
                         {{ t("Membership Discount") }}
                         ({{ 7 }}%)
-                        <span class="font-bold">${{ discount_price }}</span>
+                        <span class="font-bold"
+                            >{{ currency_symbol }}{{ discount_price }}</span
+                        >
                     </li>
                     <!-- <li class="flex flex-wrap gap-4 text-sm">
                             Tax <span class="ml-auto font-bold">{{ $page.props.settings.currency_symbol }}4.00</span>
@@ -383,7 +400,8 @@ const handleClick = (event) => {
                     >
                         {{ t("Total") }}
                         <span class="font-bold"
-                            >${{
+                            >{{ currency_symbol
+                            }}{{
                                 Number(total_price - discount_price).toFixed(2)
                             }}</span
                         >
@@ -448,7 +466,10 @@ const handleClick = (event) => {
                         />
                         <InputError :message="form.errors.phone" />
                     </div>
-                    <div class="w-full" v-if="branches.length != 0">
+                    <div
+                        class="w-full"
+                        v-if="branches.length != 0 && type != 'in-restaurant'"
+                    >
                         <label
                             for="branch"
                             class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
@@ -502,7 +523,7 @@ const handleClick = (event) => {
                                 <li>
                                     <input
                                         type="radio"
-                                        id="hosting-small"
+                                        id="from_branch"
                                         name="hosting"
                                         value="from branch"
                                         class="hidden peer"
@@ -511,7 +532,7 @@ const handleClick = (event) => {
                                         checked
                                     />
                                     <label
-                                        for="hosting-small"
+                                        for="from_branch"
                                         class="inline-flex items-center justify-between w-full p-5 text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 dark:peer-checked:text-amber-500 peer-checked:border-amber-600 peer-checked:text-amber-600 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700"
                                     >
                                         <div class="block">
@@ -555,14 +576,14 @@ const handleClick = (event) => {
                                 <li>
                                     <input
                                         type="radio"
-                                        id="hosting-big"
+                                        id="delivery"
                                         name="hosting"
                                         value="delivery"
                                         class="hidden peer"
                                         v-model="form.delivery_method"
                                     />
                                     <label
-                                        for="hosting-big"
+                                        for="delivery"
                                         class="inline-flex items-center justify-between w-full p-5 text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 dark:peer-checked:text-amber-500 peer-checked:border-amber-600 peer-checked:text-amber-600 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700"
                                     >
                                         <div class="block">
@@ -609,16 +630,86 @@ const handleClick = (event) => {
                             >
                                 {{ t("Delivery Address") }}
                             </label>
+
+                            <template v-if="$page.props.auth.user">
+                                <div
+                                    class="flex items-center ps-4 border border-gray-200 rounded-lg dark:border-gray-700 hover:bg-gray-100 mb-2"
+                                >
+                                    <input
+                                        id="main-location"
+                                        type="radio"
+                                        value="0"
+                                        name="bordered-radio"
+                                        class="w-4 h-4 text-amber-600 bg-gray-100 border-gray-300 focus:ring-amber-500 dark:focus:ring-amber-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                        checked
+                                        v-model="form.delivery_location"
+                                    />
+                                    <label
+                                        for="main-location"
+                                        class="w-full py-4 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300 cursor-pointer"
+                                        >{{ t("Main Location") }}</label
+                                    >
+                                </div>
+                                <div
+                                    class="flex items-center ps-4 border border-gray-200 rounded-lg dark:border-gray-700 hover:bg-gray-100 mb-2"
+                                    v-for="(address, index) in $page.props.auth
+                                        .user.addresses"
+                                    :key="index"
+                                >
+                                    <input
+                                        :id="`bordered-radio-${index}`"
+                                        type="radio"
+                                        :value="address.id"
+                                        name="bordered-radio"
+                                        class="w-4 h-4 text-amber-600 bg-gray-100 border-gray-300 focus:ring-amber-500 dark:focus:ring-amber-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                        v-model="form.delivery_location"
+                                    />
+                                    <label
+                                        :for="`bordered-radio-${index}`"
+                                        class="w-full py-4 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300 cursor-pointer"
+                                        >{{
+                                            address.name[$page.props.locale]
+                                        }}</label
+                                    >
+                                </div>
+                                <div
+                                    class="flex items-center ps-4 border border-gray-200 rounded-lg dark:border-gray-700 hover:bg-gray-100 mb-2"
+                                >
+                                    <input
+                                        id="another-location"
+                                        type="radio"
+                                        value="new"
+                                        name="bordered-radio"
+                                        class="w-4 h-4 text-amber-600 bg-gray-100 border-gray-300 focus:ring-amber-500 dark:focus:ring-amber-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                        v-model="form.delivery_location"
+                                    />
+                                    <label
+                                        for="another-location"
+                                        class="w-full py-4 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300 cursor-pointer"
+                                        >{{ t("Another Location") }}</label
+                                    >
+                                </div>
+                                <GoogleMap
+                                    v-if="form.delivery_location == 'new'"
+                                    api-key="AIzaSyBIuHQWvrEHg_WXDFR3xYs--TwlqAel8Ds"
+                                    style="width: 100%; height: 300px"
+                                    :center="center"
+                                    :zoom="15"
+                                    @click="handleClick"
+                                >
+                                    <Marker :options="markerOptions" />
+                                </GoogleMap>
+                            </template>
                             <GoogleMap
+                                v-else
                                 api-key="AIzaSyBIuHQWvrEHg_WXDFR3xYs--TwlqAel8Ds"
                                 style="width: 100%; height: 300px"
                                 :center="center"
-                                :zoom="12"
+                                :zoom="15"
                                 @click="handleClick"
                             >
                                 <Marker :options="markerOptions" />
                             </GoogleMap>
-                            <InputError :message="form.errors.address" />
                         </div>
                     </template>
 

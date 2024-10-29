@@ -173,7 +173,7 @@ class MenuItemController extends Controller
             foreach ($request->size_variations as $size) {
                 SizeVariation::updateOrCreate([
                     'menu_item_id' => $menuItem->id,
-                    'id' => $size['id']
+                    'id' => $size['id'] ?? null
                 ], [
                     'name' => [
                         'en' => $size['name_en'],

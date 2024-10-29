@@ -478,7 +478,10 @@ const addOrderVariation = (variation) => {
                                 </svg>
                             </button>
                             <button
-                                v-if="item.variations.length != 0"
+                                v-if="
+                                    item.variations.length != 0 ||
+                                    item.size_variations.length != 0
+                                "
                                 @click="showItemVariation(item.id)"
                                 class="bg-red-500 hover:bg-red-600 duration-300 text-white px-2 py-1 rounded m-1"
                             >
@@ -572,6 +575,18 @@ const addOrderVariation = (variation) => {
                                     class="text-xs text-gray-500 truncate dark:text-gray-400"
                                 >
                                     {{ t("Quantity") }}: {{ item.quantity }}
+                                </p>
+                                <p
+                                    v-if="item.size_variation_id"
+                                    class="text-xs text-gray-500 truncate dark:text-gray-400"
+                                >
+                                    {{ t("Size") }}:
+                                    {{
+                                        item.menu_item.size_variations.find(
+                                            (el) =>
+                                                el.id == item.size_variation_id
+                                        ).name[$page.props.locale]
+                                    }}
                                 </p>
                                 <p
                                     v-for="variation in item.variations"
@@ -803,7 +818,12 @@ const addOrderVariation = (variation) => {
                             </ul>
                         </div>
                     </div>
-                    <div>
+                    <div
+                        v-if="
+                            menu_item.variations &&
+                            menu_item.variations.length != 0
+                        "
+                    >
                         <table
                             class="mt-2 border-collapse w-full border border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-800 text-sm shadow-sm"
                         >
@@ -953,7 +973,7 @@ const addOrderVariation = (variation) => {
                 api-key="AIzaSyBIuHQWvrEHg_WXDFR3xYs--TwlqAel8Ds"
                 style="width: 100%; height: 300px"
                 :center="center"
-                :zoom="12"
+                :zoom="15"
             >
                 <Marker :options="markerOptions" />
             </GoogleMap>

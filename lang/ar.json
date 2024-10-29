@@ -242,5 +242,13 @@
     "Make Payment": "ادفع الان",
     "Send Order to Whatsapp": "ارسل الطلب عبر الواتساب",
     "Delivery Method": "طريقة الاستلام",
-    "From Branch": "من الفرع"
+    "From Branch": "من الفرع",
+    "SAR": "ريال",
+    "Add another address": "إضافة عنوان اخر",
+    "English Address": "العنوان بالانجليزي",
+    "Arabic Address": "العنوان بالعربي",
+    "Default Address": "عنوان افتراضي",
+    "Delete Address": "حذف العنوان",
+    "Main Location": "العنوان الاساسي",
+    "Another Location": "عنوان اخر"
 }

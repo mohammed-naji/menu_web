@@ -31,7 +31,12 @@ class ProfileController extends Controller
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
         $img = $request->user()->image;
-        $request->user()->fill($request->except('image'));
+        $request->user()->fill([
+            'name' => $request->input('name'),
+            'email' => $request->input('email'),
+            'phone' => $request->input('phone'),
+            'location' => $request->input('location'),
+        ]);
 
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;
@@ -44,6 +49,20 @@ class ProfileController extends Controller
         }
 
         $request->user()->save();
+
+        foreach ($request->addresses as $address) {
+            $request->user()->addresses()->updateOrCreate(
+                ['id' => $address['id'] ?? null],
+                [
+                    'name' => [
+                        'en' => $address['name_en'],
+                        'ar' => $address['name_ar']
+                    ],
+                    'location' => $address['location'],
+                    'default' => $address['default']
+                ]
+            );
+        }
 
         return Redirect::back();
     }

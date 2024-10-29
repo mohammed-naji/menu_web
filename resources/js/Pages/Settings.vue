@@ -340,7 +340,7 @@ const tabs = ref([t("General Settings"), t("Social Media"), t("Working Time")]);
                                                     height: 300px;
                                                 "
                                                 :center="center"
-                                                :zoom="12"
+                                                :zoom="15"
                                                 @click="handleClick"
                                             >
                                                 <Marker

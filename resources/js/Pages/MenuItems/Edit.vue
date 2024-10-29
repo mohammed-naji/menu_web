@@ -12,6 +12,33 @@ const props = defineProps({
     variation_options: Array,
 });
 
+const default_sizes = [
+    {
+        name_en: "Small",
+        name_ar: "صغير",
+        price: 0,
+        default: 0,
+    },
+    {
+        name_en: "Medium",
+        name_ar: "متوسط",
+        price: 0,
+        default: 0,
+    },
+    {
+        name_en: "Large",
+        name_ar: "كبير",
+        price: 0,
+        default: 0,
+    },
+    {
+        name_en: "Very Large",
+        name_ar: "كبير جدا",
+        price: 0,
+        default: 0,
+    },
+];
+
 const form = useForm({
     name_en: props.menuItem.name.en,
     name_ar: props.menuItem.name.ar,
@@ -24,15 +51,18 @@ const form = useForm({
     order: props.menuItem.order,
     has_size_variation:
         props.menuItem.size_variations.length > 0 ? true : false,
-    size_variations: props.menuItem.size_variations.map((el) => {
-        return {
-            id: el.id,
-            name_en: el.name.en,
-            name_ar: el.name.ar,
-            price: el.price,
-            default: el.default,
-        };
-    }),
+    size_variations:
+        props.menuItem.size_variations.length > 0
+            ? props.menuItem.size_variations.map((el) => {
+                  return {
+                      id: el.id,
+                      name_en: el.name.en,
+                      name_ar: el.name.ar,
+                      price: el.price,
+                      default: el.default,
+                  };
+              })
+            : default_sizes,
     has_variation: props.menuItem.variations.length > 0 ? true : false,
     variation_ids: props.menuItem.variations.map((el) => el.id),
     variation_options: props.variation_options,
