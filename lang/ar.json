@@ -250,5 +250,12 @@
     "Default Address": "عنوان افتراضي",
     "Delete Address": "حذف العنوان",
     "Main Location": "العنوان الاساسي",
-    "Another Location": "عنوان اخر"
+    "Another Location": "عنوان اخر",
+    "Name is required": "الاسم مطلوب",
+    "Email is required": "البريد الالكتروني مطلوب",
+    "Phone is required": "رقم الهاتف مطلوب",
+    "Table number is required": "رقم الطاولة مطلوب",
+    "Address is required": "العنوان مطلوب",
+    "Success": "تم بنجاح",
+    "Your order has been placed successfully": "تم تقديم الطلب بنجاح"
 }

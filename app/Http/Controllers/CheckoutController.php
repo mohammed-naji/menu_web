@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Branch;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Restaurant;
 use App\Models\Setting;
 use Illuminate\Http\Request;
@@ -30,31 +32,51 @@ class CheckoutController extends Controller
         return Inertia::render('Checkout', compact('restaurant', 'settings', 'type', 'branches'));
     }
 
-    function make_order(Request $request)
+    function make_order(Request $request, $code, $type)
     {
-        $setting = Setting::find(1);
-        $order = Order::with('orderItems.menuItem')->find($request->order_id);
+        $restaurant = Restaurant::where('code', $code)->first();
+        $settings = [];
+        foreach ($restaurant->settings as $setting) {
+            $settings[$setting->key] = $setting->value;
+        }
+
+        $order = new Order();
+        $order->user_id = Auth::id();
+        $order->restaurant_id = $restaurant->id;
+        $order->order_type = $type;
+        $order->branch_id = Branch::find($request->form['branch_id'])->id ?? null;
+
+        $total = 0;
+        foreach ($request->cart as $item) {
+            $total += $item['price'];
+        }
+        $order->total = $total;
+
         if (!Auth::check()) {
-            $order->visitor_name = $request->name;
-            $order->visitor_email = $request->email;
-            $order->visitor_phone = $request->phone;
+            $order->guest_name = $request->form['name'];
+            $order->guest_email = $request->form['email'];
+            $order->guest_phone = $request->form['phone'];
         }
 
-        if ($order->order_type == 'delivery') {
-            $order->visitor_address = $request->address;
+        if ($type == 'delivery') {
+            $order->guest_address = $request->form['address'];
         }
 
-        if ($order->order_type == 'in-restaurant') {
-            $order->table_number = $request->table_number;
+        if ($type == 'in-restaurant') {
+            $order->table_number = $request->form['table_number'];
         }
         $order->save();
 
-        $discount = 0;
-        if (Auth::check()) {
-            $discount = $setting->membership_discount / 100;
+        foreach ($request->cart as $item) {
+            OrderItem::create([
+                'order_id' => $order->id,
+                'menu_item_id' => $item['menu_item']['id'],
+                'quantity' => $item['quantity'],
+                'price' => $item['price']
+            ]);
         }
 
-        if ($request->payment_method == 'cash') {
+        if ($request->form['payment_method'] == 'cash') {
             $order->status = 'in-process';
             $order->save();
             return response()->json(['success' => 1]);
@@ -66,8 +88,8 @@ class CheckoutController extends Controller
             foreach ($order->orderItems as $item) {
                 $line_items[] = [
                     'price_data' => [
-                        'currency' => $setting->currency,
-                        'unit_amount' => (($item->price / $item->quantity) - (($item->price / $item->quantity) * $discount)) * 100,
+                        'currency' => $settings['currency'],
+                        'unit_amount' => (($item->price / $item->quantity) - (($item->price / $item->quantity) * $settings['membership_discount'])) * 100,
                         'product_data' => [
                             'name' => $item->menuItem->trans_name,
                         ],
@@ -82,7 +104,7 @@ class CheckoutController extends Controller
                     'payment_method_types' => ['card'],
                     'line_items' => $line_items,
                     'mode' => 'payment',
-                    'success_url' => route('checkout.success') . '?session_id={CHECKOUT_SESSION_ID}&order_id=' . $request->order_id,
+                    'success_url' => route('checkout.success') . '?session_id={CHECKOUT_SESSION_ID}&order_id=' . $order->id,
                     'cancel_url' => route('checkout.cancel'),
                 ]);
 

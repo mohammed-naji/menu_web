@@ -20,10 +20,11 @@ return new class extends Migration
             $table->string('guest_name')->nullable();
             $table->string('guest_email')->nullable();
             $table->string('guest_phone')->nullable();
-            $table->string('guest_address')->nullable();
+            $table->string('delivery_address')->nullable();
+            $table->integer('table_number')->nullable();
 
             $table->enum('order_type', ['in-restaurant', 'delivery', 'takeaway'])->default('in-restaurant');
-            $table->enum('status', ['pending', 'completed', 'cancelled'])->default('pending');
+            $table->enum('status', ['in-process', 'pending', 'completed', 'cancelled'])->default('in-process');
             $table->decimal('total', 8, 2);
 
             $table->string('payment_method')->default('cash');

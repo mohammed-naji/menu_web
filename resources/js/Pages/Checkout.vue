@@ -53,9 +53,6 @@ onMounted(() => {
 });
 
 const redirectToCheckout = async () => {
-    console.log(form);
-
-    return;
     if (!form.name) {
         form.errors.name = t("Name is required");
         form.hasErrors = true;
@@ -77,7 +74,7 @@ const redirectToCheckout = async () => {
         form.hasErrors = false;
     }
 
-    if (usePage().props.current_order.order_type == "in-restaurant") {
+    if (props.type == "in-restaurant") {
         if (!form.table_number) {
             form.errors.table_number = t("Table number is required");
             form.hasErrors = true;
@@ -86,7 +83,7 @@ const redirectToCheckout = async () => {
         }
     }
 
-    if (usePage().props.current_order.order_type == "delivery") {
+    if (props.type == "delivery") {
         if (!form.address) {
             form.errors.address = t("Address is required");
             form.hasErrors = true;
@@ -98,17 +95,27 @@ const redirectToCheckout = async () => {
     if (!form.hasErrors) {
         if (form.payment_method == "cash") {
             processing.value = true;
-            const response = await axios.post(route("front.checkout"), form);
-            console.log(response);
+            const data = {
+                form,
+                cart: cart.value,
+            };
+            const response = await axios.post(
+                route("make_order", [props.restaurant.code, props.type]),
+                data
+            );
 
             if (response.data) {
                 Swal.fire({
-                    title: "Success",
-                    text: "Your order has been placed successfully",
+                    title: t("Success"),
+                    text: t("Your order has been placed successfully"),
                     icon: "success",
                 });
+                localStorage.removeItem("cart");
                 setTimeout(() => {
-                    window.location = route("front.index");
+                    window.location = route("menu", [
+                        props.restaurant.code,
+                        props.type,
+                    ]);
                 }, 1000);
             } else {
                 console.error("Error in payment");
