@@ -65,6 +65,8 @@ class CheckoutController extends Controller
         if ($type == 'in-restaurant') {
             $order->table_number = $request->form['table_number'];
         }
+        $order->payment_method = $request->form['payment_method'];
+        $order->note = $request->form['note'];
         $order->save();
 
         foreach ($request->cart as $item) {
@@ -85,16 +87,22 @@ class CheckoutController extends Controller
             Stripe::setApiKey(env('STRIPE_SECRET'));
 
             $line_items = [];
-            foreach ($order->orderItems as $item) {
+            foreach ($request->cart as $item) {
+                if (Auth::check()) {
+                    $discount = $settings['membership_discount'] / 100;
+                } else {
+                    $discount = 0;
+                }
+                $price = $item['price'] / $item['quantity'];
                 $line_items[] = [
                     'price_data' => [
                         'currency' => $settings['currency'],
-                        'unit_amount' => (($item->price / $item->quantity) - (($item->price / $item->quantity) * $settings['membership_discount'])) * 100,
+                        'unit_amount' => round($price - ($price * $discount), 2) * 100,
                         'product_data' => [
-                            'name' => $item->menuItem->trans_name,
+                            'name' => $item['menu_item']['name'][app()->currentLocale()],
                         ],
                     ],
-                    'quantity' => $item->quantity,
+                    'quantity' => $item['quantity'],
                 ];
             }
 
@@ -104,8 +112,8 @@ class CheckoutController extends Controller
                     'payment_method_types' => ['card'],
                     'line_items' => $line_items,
                     'mode' => 'payment',
-                    'success_url' => route('checkout.success') . '?session_id={CHECKOUT_SESSION_ID}&order_id=' . $order->id,
-                    'cancel_url' => route('checkout.cancel'),
+                    'success_url' => route('checkout.success', [$restaurant->code, $type]) . '?session_id={CHECKOUT_SESSION_ID}&order_id=' . $order->id,
+                    'cancel_url' => route('checkout.cancel', [$restaurant->code, $type]),
                 ]);
 
                 // Return the session ID to the frontend
@@ -116,8 +124,13 @@ class CheckoutController extends Controller
         }
     }
 
-    public function success(Request $request)
+    public function success(Request $request, $code, $type)
     {
+        $restaurant = Restaurant::where('code', $code)->first();
+        $settings = [];
+        foreach ($restaurant->settings as $setting) {
+            $settings[$setting->key] = $setting->value;
+        }
         Stripe::setApiKey(env('STRIPE_SECRET'));
         $sessionId = $request->query('session_id');
         $orderId = $request->query('order_id');
@@ -133,12 +146,16 @@ class CheckoutController extends Controller
                 if ($session->payment_status == 'paid') {
                     // Update the order status to 'paid'
                     $order = Order::find($orderId);
-                    $order->status = 'confirmed';
+                    $order->is_paid = 1;
+                    $order->payment_status = 'confirmed';
                     $order->save();
                 }
                 // Pass session data to the frontend (e.g., using Inertia)
-                return Inertia::render('Front/CheckoutSuccess', [
-                    'session' => $session
+                return Inertia::render('CheckoutSuccess', [
+                    'session' => $session,
+                    'settings' => $settings,
+                    'restaurant' => $restaurant,
+                    'type' => $type,
                 ]);
             } catch (\Exception $e) {
                 return response()->json(['error' => 'Unable to retrieve session.'], 500);
@@ -151,6 +168,6 @@ class CheckoutController extends Controller
     public function cancel()
     {
         // Handle cancel redirect
-        return Inertia::render('Front/CheckoutCancel'); // Return Inertia page on cancel
+        return Inertia::render('CheckoutCancel'); // Return Inertia page on cancel
     }
 }

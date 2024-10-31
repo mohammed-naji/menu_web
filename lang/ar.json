@@ -257,5 +257,6 @@
     "Table number is required": "رقم الطاولة مطلوب",
     "Address is required": "العنوان مطلوب",
     "Success": "تم بنجاح",
-    "Your order has been placed successfully": "تم تقديم الطلب بنجاح"
+    "Your order has been placed successfully": "تم تقديم الطلب بنجاح",
+    "Notes": "ملاحظات"
 }

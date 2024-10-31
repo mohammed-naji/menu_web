@@ -46,6 +46,7 @@ const form = useForm({
     delivery_method: "from branch",
     delivery_location: 0,
     payment_method: "cash",
+    note: "",
 });
 
 onMounted(() => {
@@ -93,12 +94,13 @@ const redirectToCheckout = async () => {
     }
 
     if (!form.hasErrors) {
+        const data = {
+            form,
+            cart: cart.value,
+        };
+
         if (form.payment_method == "cash") {
             processing.value = true;
-            const data = {
-                form,
-                cart: cart.value,
-            };
             const response = await axios.post(
                 route("make_order", [props.restaurant.code, props.type]),
                 data
@@ -126,8 +128,8 @@ const redirectToCheckout = async () => {
             try {
                 processing.value = true;
                 const response = await axios.post(
-                    route("front.checkout"),
-                    form
+                    route("make_order", [props.restaurant.code, props.type]),
+                    data
                 );
                 processing.value = false;
                 if (response.data.id) {
@@ -138,13 +140,16 @@ const redirectToCheckout = async () => {
                         });
                     } else {
                         Swal.fire({
-                            title: "Success",
-                            text: "Your order has been placed successfully",
+                            title: t("Success"),
+                            text: t("Your order has been placed successfully"),
                             icon: "success",
                         });
                         setTimeout(() => {
-                            window.location = "/";
-                        });
+                            window.location = route("menu", [
+                                props.restaurant.code,
+                                props.type,
+                            ]);
+                        }, 1000);
                     }
                 } else {
                     console.error("Error creating Stripe session:");
@@ -1136,6 +1141,23 @@ const handleClick = (event) => {
                                 </label>
                             </li>
                         </ul>
+                    </div>
+                    <div class="w-full">
+                        <label
+                            for="note"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                        >
+                            {{ t("Notes") }}
+                        </label>
+                        <textarea
+                            id="note"
+                            class="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-amber-500 focus:border-amber-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-amber-500 dark:focus:border-amber-500 disabled:bg-gray-100"
+                            v-model="form.note"
+                            rows="4"
+                        ></textarea>
+                        <InputError :message="form.errors.note" />
+                    </div>
+                    <div class="w-full">
                         <button
                             class="mt-8 text-sm px-4 py-3 w-full font-semibold tracking-wide duration-300 bg-amber-600 hover:bg-amber-700 text-white rounded-md"
                             :disabled="processing"
